@@ -13,16 +13,65 @@ import os
 from discord.ext.commands import CommandNotFound
 import csv
 
+# AUTHOR: Tarun Eswar
+# UPDATE DATE: 3/6/2022
+# CONTENTIONS:
+  # 1. DATABASE
+  # 2. SETUP OF BOT
+      # PREFIX GETTER
+      # INTENTIONS/STEUP
+      # GLOBAL VARS
+      # UNKNOWN PREFIX
+      # SET DEFAULT PREFIX
+      # RETRIEVE PREFIX
+      # CHANGE PREFIX
+      # RENAME BOT
+  # 3. SCHEDULE HANDLER
+      # DEFAULT EMBEDER
+      # SCHEDULE VALIDATOR
+      # DEFAULT SCHEDULER 
+      # PERIODIC FUNCTION 1S
+  # 4. ALL COMMANDS
+      # SCHEDULE COMMANDS
+      # PRIVATE SCHEDULE
+      # FIND ANOTHERS SCHEDULE
+      # CLASS SETTERSE
+      # OWNER COMMANDS
+      # HELP COMMAND
+      # COMMAND ERROR
+
+# ---------------------------------------- #
+# ---------------- DATABASE -------------- #
+# ---------------------------------------- #
+  #db["startPeriodTmw"] = 3
+  #db["day"] = 5
+  #db["status"] = None
+  #db["holiday"] = False
+  #db["currentPeriods"] = ["Period 1: F", "Period 2: G", "Break", "Period 3: A", "Period 4: B", "Lunch/Plus", "Period 5: C"]
+  #db["sysCheck"] = "None"
+  #db["timeCheck"] = None
+  #db["pride"] = True
+  #db["bans"] = []
+  #db["bans"] = []
+  #db["half"] = False
+
+# ---------------------------------------- #
+# -------------- SETUP OF BOT ------------ #
+# ---------------------------------------- #
+
+# ------------ PREFIX GETTER --------- #
 
 def get_prefix(client, message):
   return db[str(message.guild.id)]
 
+# ------------ INTENTIONS/SETUP--------- #
 intents = discord.Intents.all()
 intents.members = True
 intents.reactions = True
 client = commands.Bot(command_prefix=get_prefix, intents=intents)
 client.remove_command('help')
 
+# ------------ GLOBAL VARS --------- #
 currentDayClasses = []
 emptybl = [""]
 current_date = None
@@ -30,20 +79,7 @@ current_time = None
 currentDay = None
 est = pytz.timezone('US/Eastern')
 
-# MANUAL DATABASE ADJUSTMENTS
-#db["startPeriodTmw"] = 3
-#db["day"] = 5
-#db["status"] = None
-#db["holiday"] = False
-#db["currentPeriods"] = ["Period 1: F", "Period 2: G", "Break", "Period 3: A", "Period 4: B", "Lunch/Plus", "Period 5: C"]
-#db["sysCheck"] = "None"
-#db["timeCheck"] = None
-#db["pride"] = True
-#db["bans"] = []
-#db["bans"] = []
-#db["half"] = False
-
-#  ----------------- SETUP OF BOT ----------------- #
+# ------------ UNKNOWN PREFIX --------- #
 @client.event
 async def on_message(message):
   if message.content == ">CMDnullOverride" and message.author.id == 743999268167352651:
@@ -54,6 +90,8 @@ async def on_message(message):
     return
   else:
     await client.process_commands(message)
+
+# ---------- SET DEFAULT PREFIX --------- #
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Game('>help'))
@@ -62,6 +100,7 @@ async def on_guild_join(guild):
   db[str(guild.id)] = ">"
 @client.command(pass_context=True)
 async def broadcast(ctx, *msg):
+  if ctx.author.id == 743999268167352651:
     for server in client.guilds:
         for channel in server.channels:
           try:
@@ -73,11 +112,16 @@ async def broadcast(ctx, *msg):
             continue
           else:
             break
+
+# ------------ RETRIEVE PREFIX --------- #
 @client.command()
 async def prefix(ctx, cmd):
   embed = discord.Embed(title = "", description = "Current prefix: " + str(cmd), colour = discord.Colour.green())
   await ctx.channel.send(embed = embed, delete_after = 5)
+
+# ------------ CHANGE PREFIX --------- #
 @client.command()
+@commands.has_permissions(administrator=True)
 async def changePrefix(ctx, cmd):
   try:
     if(len(cmd) == 1):
@@ -90,6 +134,8 @@ async def changePrefix(ctx, cmd):
   except:
     embed = discord.Embed(title = "", description = "Failed to change command. Try later.", colour = discord.Colour.red())
     await ctx.channel.send(embed = embed, delete_after = 5)
+
+# ------------ RENAME BOT --------- #
 @client.command()
 async def rename(ctx, name):
   try:
@@ -100,14 +146,18 @@ async def rename(ctx, name):
   except:
     embed = discord.Embed(title = "", description = "Issues with changing name. Too many requests or the name is overused.", colour = discord.Colour.red())
     await ctx.channel.send(embed = embed, delete_after = 5)
-#  ------------------------------------- #
 
 
-#  ----------SCHEDULE HANDLER----------- #
+# ---------------------------------------- #
+# ------------SCHEDULE HANDLER------------ #
+# ---------------------------------------- #
+
+# ------------ DEFAULT EMBEDER --------- #
 def embeds(ctx, list_msg, msg, color, time):
   embed = discord.Embed(title=list_msg, description=msg, colour=color)
   client.loop.create_task(ctx.channel.send(embed=embed, delete_after = time))
-  
+
+# ------------ SCHEDULE VALIDATOR --------- #
 def validator(message, uid):
   if str(uid) in db.keys():
     if len(db[str(uid)]) == 7:
@@ -119,6 +169,7 @@ def validator(message, uid):
     embeds(message, "", "User classes not stored. Use " + db[str(message.guild.id)] + "help", discord.Colour.red(), None)
     return False
 
+# ------------ DEFAULT SCHEDULER --------- #
 def schedules(ctx, uid, gen, stalk):
   name = ""
   if(gen == False):
@@ -201,6 +252,8 @@ def schedules(ctx, uid, gen, stalk):
     embed.set_footer(text="As of " + current_date + " at " + current_time + " EST")
   client.loop.create_task(ctx.send(embed=embed))
 
+  
+# ------------ PERIODIC FUNCTION 1S --------- #
 def checkTime():
   global currentDay
   global currentPeriod
@@ -218,6 +271,7 @@ def checkTime():
   NextDay_Date = (now1 + timedelta(days=1)).astimezone(est).strftime("%m-%d-%y")
   rows = []
 
+  # -------- Sys Checker --------#
   if (current_time == db["timeCheck"]):
     db["sysCheck"] = "Checked " + str(current_date) + " " + str(current_time)
 
@@ -327,6 +381,7 @@ async def mySchedule(message):
   if(validator(message, message.author.id)):
     schedules(message, message.author.id, False, False)
 
+# ------------ PRIVATE INDIVIDUAL --------- #
 @client.command()
 async def private(ctx):
   try: 
@@ -337,6 +392,8 @@ async def private(ctx):
     db[str(ctx.author.id) + "priv"] = True
     embeds(ctx, "", "Schedule private status set True", discord.Colour.green(), None)
 @client.command()
+
+# ------------ FIND ANOTHERS SCHEDULE --------- #
 async def stalk(ctx, user: discord.User):
   if str(user.id) not in db.keys():
     embeds(ctx, "", "User does not have classes stored.", discord.Colour.red(), 5)
@@ -357,6 +414,8 @@ async def stalk(ctx, user: discord.User):
       schedules(ctx, user.id, False, True)
     else:
       embeds(ctx, "", "Unavailable: Users schedule is private.", discord.Colour.red(), 5)
+
+# ------------ CLASS SETTERS --------- #
 @client.command()
 async def addClass(ctx,classes):
   if str(ctx.author.id) not in db.keys():
@@ -367,6 +426,7 @@ async def addClass(ctx,classes):
     elif len(db[str(ctx.author.id)]) < 7:
       db[str(ctx.author.id)].append(classes)
       embeds(ctx, "", str(classes) + " has been added.", discord.Colour.green(), 5)
+      
 @client.command()
 async def addClasses(ctx,*classes):
   if str(ctx.author.id) not in db.keys():
@@ -386,6 +446,7 @@ async def addClasses(ctx,*classes):
       embeds(ctx, "", "Classes added!", discord.Colour.green(), None)
     elif len(classes) != 7:
       embeds("", "Too few or too many classes. Classes with multiple words should used quotations around them.", discord.Colour.red(), 5)
+      
 @client.command()
 async def swapClasses(ctx, class1, class2):
   if str(ctx.author.id) not in db.keys():
@@ -401,6 +462,7 @@ async def swapClasses(ctx, class1, class2):
     else:
       colorSel = discord.Colour.green()
     embeds(ctx, "", msg, colorSel, None)
+    
 @client.command()
 async def reset(ctx):
   if str(ctx.author.id) not in db.keys():
@@ -532,7 +594,7 @@ async def blocks(message):
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 
-# --- HELP COMMANDS --- #
+# ------------ HELP COMMAND --------- #
 @client.command()
 async def help(message):
     result = "\n"
@@ -542,14 +604,14 @@ async def help(message):
     embed.add_field(name="\n**Purpose:**", value="School utilities.", inline = False)    
     embed.add_field(name="\n**Summoning The Bot:**", value=f"> Use the command " + db[str(message.guild.id)] + " to summon the bot\n> default prefix is > \n> use " + db[str(message.guild.id)] + "changePrefix to change the prefx", inline = False)    
     if(message.author.id != 743999268167352651):
-      embed.add_field(name="**Commands:**", value="Commands for schedules: \n\n> " + cmd + "schedule \n> >addClass [class name] - add your own classes 1 at a time from period A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class in list] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n> " + cmd + "mySchedule - display your classes specifically\n> >private - make your schedule privated(others can't view it) \n> " + cmd + "stalk [@user] - find someone else's schedule", inline = False)
+      embed.add_field(name="**Commands:**", value="Commands for schedules: \n\n> " + cmd + "schedule \n> " + cmd + "addClass [class name] - add your own classes 1 at a time from period A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class in list] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n> " + cmd + "mySchedule - display your classes specifically\n> " + cmd + "private - make your schedule privated(others can't view it) \n> " + cmd + "stalk [@user] - find someone else's schedule", inline = False)
       embed.add_field(name="Open Source Code", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
     else:
       embed.add_field(name="**Link to code**", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
-      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
+      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "broadcast [message] \n> " + cmd + "rename [new bot name] \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
     await message.channel.send(embed = embed)
 
-# --- COMMAND ERROR --- #
+# ------------ COMMAND ERROR --------- #
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
