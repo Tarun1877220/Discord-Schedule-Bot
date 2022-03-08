@@ -276,9 +276,10 @@ def checkTime():
     db["sysCheck"] = "Checked " + str(current_date) + " " + str(current_time)
 
   # -------- Auto 7AM HIT --------#
-  if (current_time == "06:30:00" and db["day"] < 5 and db["holiday"] == False):
-    channel = client.get_channel(932858966638223390)
+  if (current_time == "16:06:30" and db["day"] < 5 and db["holiday"] == False):
+    channel = client.get_channel(870469137577685054)
     schedules(channel, 765582891949883403, True, False)
+    #  schedules(message, message.author.id, True, False)
     
   # -------- 151-00 HD HIT --------#
   if (current_time == '20:20:20'):
@@ -291,7 +292,7 @@ def checkTime():
           else:
             db["half"] = False
         else:
-          db["half"] = True
+          db["half"] = False
 
   # ---------- 151-10 HIT ----------#
   if (current_time == '13:51:10' and db["holiday"]==False): 
@@ -519,6 +520,13 @@ async def half(message):
   if(message.author.id == 743999268167352651):
     day = db["half"]
     embeds(message, "", "HD status for tomorrow is: " + str(day), discord.Colour.green(), None)
+  else:
+    embeds(message, "", "Owner only command", discord.Colour.red(), 5)
+@client.command()
+async def halfChange(message):
+  if(message.author.id == 743999268167352651):
+    db["half"] = not db["half"]
+    embeds(message, "", "HD status for tomorrow changed to: " + str(db["half"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
