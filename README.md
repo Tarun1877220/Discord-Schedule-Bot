@@ -1,6 +1,6 @@
-# DiscordScheduleBot
+# EducationalThings
 
-View schedule for Chelmsford High School using a Discord bot. Other features such as individual schedules are available.
+View schedule for Chelmsford High School with additional features such as a personal schedule or viewing others schedules. Use >help after addding the bot to view all.
 
 Download: tinyurl.com/bpanmv4v
 
