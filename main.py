@@ -277,7 +277,7 @@ def checkTime():
 
   # -------- Auto 7AM HIT --------#
   if (current_time == "16:06:30" and db["day"] < 5 and db["holiday"] == False):
-    channel = client.get_channel(870469137577685054)
+    channel = client.get_channel(932858966638223390)
     schedules(channel, 765582891949883403, True, False)
     #  schedules(message, message.author.id, True, False)
     
