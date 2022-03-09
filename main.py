@@ -287,7 +287,11 @@ def checkTime():
     db["sysCheck"] = "Checked " + str(current_date) + " " + str(current_time)
 
   # -------- Auto 7AM HIT --------#
+<<<<<<< HEAD
   if (current_time == "06:30:30" and db["day"] < 5 and db["holiday"] == False):
+=======
+  if (current_time == "16:06:30" and db["day"] < 5 and db["holiday"] == False):
+>>>>>>> 36a1972a5b96aaa6af57ba0bb79e8529c0bbbedb
     channel = client.get_channel(932858966638223390)
     schedules(channel, 765582891949883403, True, False)
     #  schedules(message, message.author.id, True, False)
