@@ -43,17 +43,26 @@ import csv
 # ---------------------------------------- #
 # ---------------- DATABASE -------------- #
 # ---------------------------------------- #
-  #db["startPeriodTmw"] = 3
-  #db["day"] = 5
-  #db["status"] = None
-  #db["holiday"] = False
-  #db["currentPeriods"] = ["Period 1: F", "Period 2: G", "Break", "Period 3: A", "Period 4: B", "Lunch/Plus", "Period 5: C"]
-  #db["sysCheck"] = "None"
-  #db["timeCheck"] = None
-  #db["pride"] = True
-  #db["bans"] = []
-  #db["bans"] = []
-  #db["half"] = False
+  # Setting num of first period after current blocks (0-6) 
+    # db["startPeriodTmw"] = 6
+  # Sets the day (0-6)
+    # db["day"] = 5
+  # Last time the bot was updated for schedule
+    # db["status"] = None
+  # Sets if there's a holiday
+    # db["holiday"] = False
+  # Current blocks
+    # db["currentPeriods"] = ["Period 1: B", "Period 2: C", "Break", "Period 3: D", "Period 4: E", "Lunch/Plus", "Period 5: F"]
+  # Status for if the system was checked or not
+    # db["sysCheck"] = "None"
+  # Manual check to see if the bot is refreshing, the time value is set here
+    # db["timeCheck"] = None
+  # Sets True/False value for if there's pride block
+    # db["pride"] = True
+  # List of banned users (banned for spamming/misuse etc)
+    # db["bans"] = []
+  # True/False value for if the next day is a half day
+    # db["half"] = False
 
 # ---------------------------------------- #
 # -------------- SETUP OF BOT ------------ #
@@ -173,7 +182,7 @@ def validator(message, uid):
 def schedules(ctx, uid, gen, stalk):
   name = ""
   if(gen == False):
-    name = "[" + client.get_user(uid).name + "]"
+    name = "For user: " + str(client.get_user(uid).name).capitalize() + " \n"
   school = current_time >= '00:00:00' and current_time <= '13:55:00'
   afterSchool = not school
   msg = ""
@@ -212,13 +221,13 @@ def schedules(ctx, uid, gen, stalk):
 
   # Title setting
   if (school and db["day"] < 5):
-    list_msg = "**Today's Schedule:  " + name + "** \n"
+    list_msg = "**__Today's Schedule__** \n"
   elif (afterSchool and (db["day"] != 4) and (db["day"] < 5) and db["holiday"]==False):
-    list_msg = "**Tommorrow's Schedule:  " + name + "** \n"
+    list_msg = "**__Tommorrow's Schedule__** \n"
   elif (afterSchool and (db["day"] >= 4) and db["holiday"]==False):
-    list_msg = "**Monday's Schedule: " + name + "** \n"
+    list_msg = "**__Monday's Schedule__** \n"
   elif (db["holiday"]==True):
-    list_msg = "**Schedule After Return: " + name + "** \n"
+    list_msg = "**__Schedule After Return__** \n"
 
   # K used to count down individual schedule
   k = 5
@@ -243,12 +252,14 @@ def schedules(ctx, uid, gen, stalk):
           msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
       else:
         msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
-  embed = discord.Embed(title=list_msg, description=msg, colour=random.choice(colors))
+  embed = discord.Embed(title=list_msg, description=name + "\n" + msg, colour=random.choice(colors))
   if(stalk):
+    embed.set_thumbnail(url=client.get_user(uid).avatar_url)
     embed.set_footer(text="Use >private to private schedule.")
   elif(gen):
-    embed.set_footer(text="Use " + db[str(ctx.guild.id)] + "mySchedule for individual schedule. " + current_date + " at " + current_time + " EST")
+    embed.set_footer(text="Personalize with " + db[str(ctx.guild.id)] + "mySchedule: " + current_date + " at " + current_time + " EST")
   elif(not gen):
+    embed.set_thumbnail(url=ctx.author.avatar_url)
     embed.set_footer(text="As of " + current_date + " at " + current_time + " EST")
   client.loop.create_task(ctx.send(embed=embed))
 
@@ -276,13 +287,13 @@ def checkTime():
     db["sysCheck"] = "Checked " + str(current_date) + " " + str(current_time)
 
   # -------- Auto 7AM HIT --------#
-  if (current_time == "16:06:30" and db["day"] < 5 and db["holiday"] == False):
-    channel = client.get_channel(870469137577685054)
+  if (current_time == "06:30:30" and db["day"] < 5 and db["holiday"] == False):
+    channel = client.get_channel(932858966638223390)
     schedules(channel, 765582891949883403, True, False)
     #  schedules(message, message.author.id, True, False)
     
   # -------- 151-00 HD HIT --------#
-  if (current_time == '20:20:20'):
+  if (current_time == '13:50:20'):
     for row in csvreader:
       rows.append(row)
       for i in range(len(rows)):
@@ -295,7 +306,7 @@ def checkTime():
           db["half"] = False
 
   # ---------- 151-10 HIT ----------#
-  if (current_time == '13:51:10' and db["holiday"]==False): 
+  if (current_time == '13:50:40' and db["holiday"]==False): 
     currentDayClasses = []
     currentPeriod = db["startPeriodTmw"]
     # next day is a break day
@@ -344,7 +355,7 @@ def checkTime():
     db["currentPeriods"] = currentDayClasses
     
   # ---------- 2PM HOLIDAY HIT ----------#
-  if (current_time == '13:51:33'): 
+  if (current_time == '13:51:00'): 
     for row in csvreader:
       rows.append(row)
       for i in len(rows):
