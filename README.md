@@ -1,8 +1,33 @@
-# EducationalThings
+# Overview
 
-View schedule for Chelmsford High School with additional features such as a personal schedule or viewing others schedules. Use >help after addding the bot to view all.
+View the schedule for Chelmsford High School on discord using EducationalThings. Some features include personalizing a schedule or viewing the schedule of others. Use >help after addding the bot to a server to view all.
 
-Download: tinyurl.com/bpanmv4v
+Download: https://tinyurl.com/bpanmv4v
+
 (shorted link to Discord install page)
 
-Upload to https://replit.com/~, establish the repl db using the first section, and then run the bot using https://uptimerobot.com/ for continuous hosting.
+# File Contents
+
+1. DATABASE - 44<br/><br/>
+2. SETUP OF BOT - 68
+   - PREFIX GETTER
+   - INTENTIONS/STEUP
+   - GLOBAL VARS
+   - UNKNOWN PREFIX
+   - SET DEFAULT PREFIX
+   - RETRIEVE PREFIX
+   - CHANGE PREFIX
+   - RENAME BOT <br/><br/>
+3. SCHEDULE HANDLER - 161
+   - DEFAULT EMBEDER
+   - SCHEDULE VALIDATOR
+   - DEFAULT SCHEDULER
+   - PERIODIC FUNCTION 1S <br/><br/>
+4. ALL COMMANDS - 383
+   - SCHEDULE COMMANDS
+   - PRIVATE SCHEDULE
+   - FIND ANOTHERS SCHEDULE
+   - CLASS SETTERSE
+   - OWNER COMMANDS
+   - HELP COMMAND
+   - COMMAND ERROR

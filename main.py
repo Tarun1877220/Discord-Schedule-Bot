@@ -14,8 +14,8 @@ from discord.ext.commands import CommandNotFound
 import csv
 
 # AUTHOR: Tarun Eswar
-# UPDATE DATE: 3/6/2022
-# CONTENTIONS:
+# UPDATE DATE: 3/11/2022
+# CONTENTS:
   # 1. DATABASE
   # 2. SETUP OF BOT
       # PREFIX GETTER
@@ -44,15 +44,15 @@ import csv
 # ---------------- DATABASE -------------- #
 # ---------------------------------------- #
   # Setting num of first period after current blocks (0-6) 
-    # db["startPeriodTmw"] = 6
+    # db["startPeriodTmw"] = 0
   # Sets the day (0-6)
-    # db["day"] = 5
+    # db["day"] = 4
   # Last time the bot was updated for schedule
     # db["status"] = None
   # Sets if there's a holiday
     # db["holiday"] = False
   # Current blocks
-    # db["currentPeriods"] = ["Period 1: B", "Period 2: C", "Break", "Period 3: D", "Period 4: E", "Lunch/Plus", "Period 5: F"]
+    # db["currentPeriods"] = ["Period 1: C", "Period 2: D", "Break", "Period 3: E", "Period 4: F", "Lunch/Plus", "Period 5: G"]
   # Status for if the system was checked or not
     # db["sysCheck"] = "None"
   # Manual check to see if the bot is refreshing, the time value is set here
