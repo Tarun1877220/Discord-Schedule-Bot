@@ -252,15 +252,15 @@ def schedules(ctx, uid, gen, stalk):
           msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
       else:
         msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
-  embed = discord.Embed(title=list_msg, description=name + "\n" + msg, colour=random.choice(colors))
+  embed = discord.Embed(title=list_msg, description=msg, colour=random.choice(colors))
   if(stalk):
     embed.set_thumbnail(url=client.get_user(uid).avatar_url)
     embed.set_footer(text="Use >private to private schedule.")
   elif(gen):
-    embed.set_footer(text="Personalize with " + db[str(ctx.guild.id)] + "mySchedule: " + current_date + " at " + current_time + " EST")
+    embed.set_footer(text="Personalize with " + db[str(ctx.guild.id)] + "mySchedule \n" + current_date + " / " + current_time + " EST")
   elif(not gen):
     embed.set_thumbnail(url=ctx.author.avatar_url)
-    embed.set_footer(text="As of " + current_date + " at " + current_time + " EST")
+    embed.set_footer(text=name + current_date + " / " + current_time + " EST")
   client.loop.create_task(ctx.send(embed=embed))
 
   
