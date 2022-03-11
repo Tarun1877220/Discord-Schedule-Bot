@@ -92,7 +92,7 @@ est = pytz.timezone('US/Eastern')
 @client.event
 async def on_message(message):
   if message.content == ">CMDnullOverride" and message.author.id == 743999268167352651:
-    db[str(message.guild.id)] = "."
+    db[str(message.guild.id)] = ">"
     embed = discord.Embed(title = "", description = "Prfx error resolved.", colour = discord.Colour.green())
     await message.channel.send(embed = embed)
   elif str(message.author.id) in db["bans"]:
@@ -287,11 +287,7 @@ def checkTime():
     db["sysCheck"] = "Checked " + str(current_date) + " " + str(current_time)
 
   # -------- Auto 7AM HIT --------#
-<<<<<<< HEAD
   if (current_time == "06:30:30" and db["day"] < 5 and db["holiday"] == False):
-=======
-  if (current_time == "16:06:30" and db["day"] < 5 and db["holiday"] == False):
->>>>>>> 36a1972a5b96aaa6af57ba0bb79e8529c0bbbedb
     channel = client.get_channel(932858966638223390)
     schedules(channel, 765582891949883403, True, False)
     #  schedules(message, message.author.id, True, False)
