@@ -411,10 +411,10 @@ async def private(ctx):
   try: 
     db[str(ctx.author.id) + "priv"] = not db[str(ctx.author.id) + "priv"]
     var = db[str(ctx.author.id) + "priv"]
-    embeds(ctx, "", "Schedule private status " + str(var), discord.Colour.green(), None, time())
+    embeds(ctx, "", "Schedule private status " + str(var), discord.Colour.green(), None)
   except:
     db[str(ctx.author.id) + "priv"] = True
-    embeds(ctx, "", "Schedule private status set True", discord.Colour.green(), None, time())
+    embeds(ctx, "", "Schedule private status set True", discord.Colour.green(), None)
 
 # ------------ FIND ANOTHERS SCHEDULE --------- #
 @client.command()
@@ -522,7 +522,7 @@ async def ban(ctx, user: discord.User, *args):
   if(ctx.author.id == 743999268167352651):
     banlist = db["bans"]
     if(str(user.id) in banlist):
-      embeds(ctx, "", str(user.name) + " was already banned.", discord.Colour.red(), None, time())
+      embeds(ctx, "", str(user.name) + " was already banned.", discord.Colour.red(), None)
     else:
       if(str(user.id) in db.keys()):
         del db[str(user.id)]
@@ -532,7 +532,7 @@ async def ban(ctx, user: discord.User, *args):
       for i in range(len(args)):
         banmsg += (args[i] + " ")
       await channel.send("You have been banned. Reason: " + banmsg)
-      embeds(ctx, "", str(user.name) + " is now banned.", discord.Colour.green(), None, time())
+      embeds(ctx, "", str(user.name) + " is now banned.", discord.Colour.green(), None)
   else:
     embeds(ctx, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
@@ -544,16 +544,16 @@ async def unban(ctx, user: discord.User):
       db["bans"] = banlist
       channel = await user.create_dm()
       await channel.send("You have been unbanned.")
-      embeds(ctx, "", str(user.name) + " is now unbanned.", discord.Colour.green(), None, time())
+      embeds(ctx, "", str(user.name) + " is now unbanned.", discord.Colour.green(), None)
     elif user.id not in db["bans"]:
-      embeds(ctx, "", str(user.name) + " is not on ban list.", discord.Colour.red(), None, time())
+      embeds(ctx, "", str(user.name) + " is not on ban list.", discord.Colour.red(), None)
   else:
     embeds(ctx, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def day(message):
   days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(days[db["day"]]) + ", " + str(current_date), discord.Colour.green(), None, time())
+    embeds(message, "", str(days[db["day"]]) + ", " + str(current_date), discord.Colour.green(), None)
   else:
     print("here")
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
@@ -561,86 +561,86 @@ async def day(message):
 async def half(message):
   if(message.author.id == 743999268167352651):
     day = db["half"]
-    embeds(message, "", "HD status for tomorrow is: " + str(day), discord.Colour.green(), None, time())
+    embeds(message, "", "HD status for tomorrow is: " + str(day), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def halfChange(message):
   if(message.author.id == 743999268167352651):
     db["half"] = not db["half"]
-    embeds(message, "", "HD status for tomorrow changed to: " + str(db["half"]), discord.Colour.green(), None, time())
+    embeds(message, "", "HD status for tomorrow changed to: " + str(db["half"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def SDAT(message):
   if(message.author.id == 743999268167352651):
     day = db["startPeriodTmw"]
-    embeds(message, "", "The start day after tomorrow is: " + str(day), discord.Colour.green(), None, time())
+    embeds(message, "", "The start day after tomorrow is: " + str(day), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def status(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(db["status"]), discord.Colour.green(), None, time())
+    embeds(message, "", str(db["status"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def holidayTrue(message):
   if(message.author.id == 743999268167352651 or message.author.id == 235148962103951360):
     db["holiday"] = True
-    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None, time())
+    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def holidayFalse(message):
   if(message.author.id == 743999268167352651 or message.author.id == 235148962103951360):
     db["holiday"] = False
-    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None, time())
+    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheck(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(db["sysCheck"]), discord.Colour.green(), None, time())
+    embeds(message, "", str(db["sysCheck"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()  
 async def prideStatus(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", "Pride status is currently " + str(db["pride"]), discord.Colour.green(), None, time())
+    embeds(message, "", "Pride status is currently " + str(db["pride"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def prideChange(message):
   if(message.author.id == 743999268167352651):
     db["pride"] = not db["pride"]
-    embeds(message, "", "Pride change to: " + str(db["pride"]), discord.Colour.green(), None, time())
+    embeds(message, "", "Pride change to: " + str(db["pride"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheckTime(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", "System will be checked at: " + str(db["timeCheck"]), discord.Colour.green(), None, time())
+    embeds(message, "", "System will be checked at: " + str(db["timeCheck"]), discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheckTimeIn(message, args):
   if(message.author.id != 743999268167352651):
     db["timeCheck"] = str(args)
-    embeds(message, "", str(args) + " is the set time.", discord.Colour.green(), None, time())
+    embeds(message, "", str(args) + " is the set time.", discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def keys(message):
   if(message.author.id == 743999268167352651):
     keys = db.keys()
-    embeds(message, "", keys, discord.Colour.green(), None, time())
+    embeds(message, "", keys, discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def blocks(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", db["currentPeriods"], discord.Colour.green(), None, time())
+    embeds(message, "", db["currentPeriods"], discord.Colour.green(), None)
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 
