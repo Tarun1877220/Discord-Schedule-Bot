@@ -91,7 +91,7 @@ est = pytz.timezone('US/Eastern')
 # ------------ UNKNOWN PREFIX --------- #
 @client.event
 async def on_message(message):
-  if message.content == ">CMDnullOverride" and message.author.id == 743999268167352651:
+  if message.content == ">CMDnullOverride" and message.author.id == 765582891949883403:
     db[str(message.guild.id)] = ">"
     embed = discord.Embed(title = "", description = "Prfx error resolved.", colour = discord.Colour.green())
     await message.channel.send(embed = embed)
@@ -162,9 +162,21 @@ async def rename(ctx, name):
 # ---------------------------------------- #
 
 # ------------ DEFAULT EMBEDER --------- #
-def embeds(ctx, list_msg, msg, color, time):
+def embeds(ctx, list_msg, msg, color, time, *footer):
   embed = discord.Embed(title=list_msg, description=msg, colour=color)
+  foot = ""
+  for i in range(len(footer)):
+    foot += (footer[i] + " ")
+  if len(str(footer)) > 2:
+    embed.set_footer(text=foot)
   client.loop.create_task(ctx.channel.send(embed=embed, delete_after = time))
+
+# ------------ TIME GETTER --------- #
+def time():
+  now1 = datetime.now()
+  current_date = now1.astimezone(est).strftime("%m-%d")
+  current_time = now1.astimezone(est).strftime("%H:%M:%S")
+  return current_date + "/" + current_time
 
 # ------------ SCHEDULE VALIDATOR --------- #
 def validator(message, uid):
@@ -296,14 +308,14 @@ def checkTime():
   if (current_time == '13:50:20'):
     for row in csvreader:
       rows.append(row)
-      for i in range(len(rows)):
-        if (str(NextDay_Date) == str(rows[i][0]) or (db["day"] == 4 and str(AfterWKND_Date) == str(rows[i][0]))):
-          if str(rows[i][1]) == "Half":
-            db["half"] = True
-          else:
-            db["half"] = False
+    for i in range(len(rows)):
+      if (str(NextDay_Date) == str(rows[i][0]) or (db["day"] == 4 and str(AfterWKND_Date) == str(rows[i][0]))):
+        if str(rows[i][1]) == "Half":
+          db["half"] = True
         else:
           db["half"] = False
+      else:
+        db["half"] = False
 
   # ---------- 151-10 HIT ----------#
   if (current_time == '13:50:40' and db["holiday"]==False): 
@@ -358,14 +370,14 @@ def checkTime():
   if (current_time == '13:51:00'): 
     for row in csvreader:
       rows.append(row)
-      for i in len(rows):
-        if (str(NextDay_Date) == str(rows[i][0]) or (db["day"] == 4 and str(AfterWKND_Date) == str(rows[i][0]))):
-          if rows[i][1] == "None":
-            db["holiday"] = True
-          else:
-            db["holiday"] = False
+    for i in len(rows):
+      if (str(NextDay_Date) == str(rows[i][0]) or (db["day"] == 4 and str(AfterWKND_Date) == str(rows[i][0]))):
+        if rows[i][1] == "None":
+          db["holiday"] = True
         else:
           db["holiday"] = False
+      else:
+        db["holiday"] = False
   
   # ---------- CHANGE DAY ----------#
   if (current_time == '23:59:59'):
@@ -399,13 +411,13 @@ async def private(ctx):
   try: 
     db[str(ctx.author.id) + "priv"] = not db[str(ctx.author.id) + "priv"]
     var = db[str(ctx.author.id) + "priv"]
-    embeds(ctx, "", "Schedule private status " + str(var), discord.Colour.green(), None)
+    embeds(ctx, "", "Schedule private status " + str(var), discord.Colour.green(), None, time())
   except:
     db[str(ctx.author.id) + "priv"] = True
-    embeds(ctx, "", "Schedule private status set True", discord.Colour.green(), None)
-@client.command()
+    embeds(ctx, "", "Schedule private status set True", discord.Colour.green(), None, time())
 
 # ------------ FIND ANOTHERS SCHEDULE --------- #
+@client.command()
 async def stalk(ctx, user: discord.User):
   if str(user.id) not in db.keys():
     embeds(ctx, "", "User does not have classes stored.", discord.Colour.red(), 5)
@@ -426,6 +438,25 @@ async def stalk(ctx, user: discord.User):
       schedules(ctx, user.id, False, True)
     else:
       embeds(ctx, "", "Unavailable: Users schedule is private.", discord.Colour.red(), 5)
+      
+# ------------ HOLIDAY FIND  --------- #
+@client.command()
+async def daysoff(ctx):
+  file = open("schooldays.csv")
+  csvreader = csv.reader(file)
+  msg = ""
+  rows = []
+  colors = [
+        0xdbbe8a, 0xcae394, 0x82adc4, 0xc0a8f0, 0x8c2727, 0xe08743, 0xffc800, 0x6e7a58, 0x8affcc, 0x5a6e65
+    ]
+  for row in csvreader:
+    rows.append(row)
+  for i in range(len(rows)):
+    if rows[i][1] == "None":
+      msg = msg + ("*" + str((rows[i][0])) + "*" + " - **" + "No school: " + rows[i][2] + "**\n")
+    elif rows[i][1] == "Half":
+      msg = msg + ("*" + str((rows[i][0])) + "*" + " - **" + "Half-day" + "**\n")
+  embeds(ctx, "__Upcoming Days Off__", msg, random.choice(colors), None, time())
 
 # ------------ CLASS SETTERS --------- #
 @client.command()
@@ -491,7 +522,7 @@ async def ban(ctx, user: discord.User, *args):
   if(ctx.author.id == 743999268167352651):
     banlist = db["bans"]
     if(str(user.id) in banlist):
-      embeds(ctx, "", str(user.name) + " was already banned.", discord.Colour.red(), None)
+      embeds(ctx, "", str(user.name) + " was already banned.", discord.Colour.red(), None, time())
     else:
       if(str(user.id) in db.keys()):
         del db[str(user.id)]
@@ -501,7 +532,7 @@ async def ban(ctx, user: discord.User, *args):
       for i in range(len(args)):
         banmsg += (args[i] + " ")
       await channel.send("You have been banned. Reason: " + banmsg)
-      embeds(ctx, "", str(user.name) + " is now banned.", discord.Colour.green(), None)
+      embeds(ctx, "", str(user.name) + " is now banned.", discord.Colour.green(), None, time())
   else:
     embeds(ctx, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
@@ -513,16 +544,16 @@ async def unban(ctx, user: discord.User):
       db["bans"] = banlist
       channel = await user.create_dm()
       await channel.send("You have been unbanned.")
-      embeds(ctx, "", str(user.name) + " is now unbanned.", discord.Colour.green(), None)
+      embeds(ctx, "", str(user.name) + " is now unbanned.", discord.Colour.green(), None, time())
     elif user.id not in db["bans"]:
-      embeds(ctx, "", str(user.name) + " is not on ban list.", discord.Colour.red(), None)
+      embeds(ctx, "", str(user.name) + " is not on ban list.", discord.Colour.red(), None, time())
   else:
     embeds(ctx, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def day(message):
   days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(days[db["day"]]) + ", " + str(current_date), discord.Colour.green(), None)
+    embeds(message, "", str(days[db["day"]]) + ", " + str(current_date), discord.Colour.green(), None, time())
   else:
     print("here")
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
@@ -530,86 +561,86 @@ async def day(message):
 async def half(message):
   if(message.author.id == 743999268167352651):
     day = db["half"]
-    embeds(message, "", "HD status for tomorrow is: " + str(day), discord.Colour.green(), None)
+    embeds(message, "", "HD status for tomorrow is: " + str(day), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def halfChange(message):
   if(message.author.id == 743999268167352651):
     db["half"] = not db["half"]
-    embeds(message, "", "HD status for tomorrow changed to: " + str(db["half"]), discord.Colour.green(), None)
+    embeds(message, "", "HD status for tomorrow changed to: " + str(db["half"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def SDAT(message):
   if(message.author.id == 743999268167352651):
     day = db["startPeriodTmw"]
-    embeds(message, "", "The start day after tomorrow is: " + str(day), discord.Colour.green(), None)
+    embeds(message, "", "The start day after tomorrow is: " + str(day), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def status(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(db["status"]), discord.Colour.green(), None)
+    embeds(message, "", str(db["status"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def holidayTrue(message):
   if(message.author.id == 743999268167352651 or message.author.id == 235148962103951360):
     db["holiday"] = True
-    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None)
+    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def holidayFalse(message):
   if(message.author.id == 743999268167352651 or message.author.id == 235148962103951360):
     db["holiday"] = False
-    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None)
+    embeds(message, "", "Holiday status set: " + str(db["holiday"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheck(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", str(db["sysCheck"]), discord.Colour.green(), None)
+    embeds(message, "", str(db["sysCheck"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()  
 async def prideStatus(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", "Pride status is currently " + str(db["pride"]), discord.Colour.green(), None)
+    embeds(message, "", "Pride status is currently " + str(db["pride"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def prideChange(message):
   if(message.author.id == 743999268167352651):
     db["pride"] = not db["pride"]
-    embeds(message, "", "Pride change to: " + str(db["pride"]), discord.Colour.green(), None)
+    embeds(message, "", "Pride change to: " + str(db["pride"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheckTime(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", "System will be checked at: " + str(db["timeCheck"]), discord.Colour.green(), None)
+    embeds(message, "", "System will be checked at: " + str(db["timeCheck"]), discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def sysCheckTimeIn(message, args):
   if(message.author.id != 743999268167352651):
     db["timeCheck"] = str(args)
-    embeds(message, "", str(args) + " is the set time.", discord.Colour.green(), None)
+    embeds(message, "", str(args) + " is the set time.", discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def keys(message):
   if(message.author.id == 743999268167352651):
     keys = db.keys()
-    embeds(message, "", keys, discord.Colour.green(), None)
+    embeds(message, "", keys, discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
 async def blocks(message):
   if(message.author.id == 743999268167352651):
-    embeds(message, "", db["currentPeriods"], discord.Colour.green(), None)
+    embeds(message, "", db["currentPeriods"], discord.Colour.green(), None, time())
   else:
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 
@@ -623,11 +654,11 @@ async def help(message):
     embed.add_field(name="\n**Purpose:**", value="School utilities.", inline = False)    
     embed.add_field(name="\n**Summoning The Bot:**", value=f"> Use the command " + db[str(message.guild.id)] + " to summon the bot\n> default prefix is > \n> use " + db[str(message.guild.id)] + "changePrefix to change the prefx", inline = False)    
     if(message.author.id != 743999268167352651):
-      embed.add_field(name="**Commands:**", value="Commands for schedules: \n\n> " + cmd + "schedule \n> " + cmd + "addClass [class name] - add your own classes 1 at a time from period A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class in list] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n> " + cmd + "mySchedule - display your classes specifically\n> " + cmd + "private - make your schedule privated(others can't view it) \n> " + cmd + "stalk [@user] - find someone else's schedule", inline = False)
+      embed.add_field(name="**Commands:**", value="Commands for schedules: \n\n> " + cmd + "schedule \n> " + cmd + "daysoff - view the upcoming days off from school \n> " + cmd + "addClass [class name] - add your own classes 1 at a time from period A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class in list] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n> " + cmd + "mySchedule - display your classes specifically\n> " + cmd + "private - make your schedule privated(others can't view it) \n> " + cmd + "stalk [@user] - find someone else's schedule", inline = False)
       embed.add_field(name="Open Source Code", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
     else:
       embed.add_field(name="**Link to code**", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
-      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "broadcast [message] \n> " + cmd + "rename [new bot name] \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
+      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "broadcast [message] \n> " + cmd + "rename [new bot name] \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "daysoff - view the upcoming days off from school \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
     await message.channel.send(embed = embed)
 
 # ------------ COMMAND ERROR --------- #
