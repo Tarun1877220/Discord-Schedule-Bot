@@ -12,6 +12,10 @@ import random
 import os
 from discord.ext.commands import CommandNotFound
 import csv
+#from discord_components import DiscordComponents, ComponentsBot, Button, SelectOption, Select
+#from discord_slash.utils.manage_components import create_button, create_actionrow
+#from discord_slash.model import ButtonStyle
+
 
 # AUTHOR: Tarun Eswar
 # UPDATE DATE: 3/11/2022
@@ -44,26 +48,41 @@ import csv
 # ---------------- DATABASE -------------- #
 # ---------------------------------------- #
   # Setting num of first period after current blocks (0-6) 
-# db["startPeriodTmw"] = 0
+    #db["startPeriodTmw"] = 1
   # Sets the day (0-6)
-    # db["day"] = 4
+    #db["day"] = 2
   # Last time the bot was updated for schedule
     # db["status"] = None
   # Sets if there's a holiday
     # db["holiday"] = False
-  # Current blocks
-
-# db["currentPeriods"] = ["Period 1: C", "Period 2: D", "Break", "Period 3: E", "Period 4: F", "Lunch/Plus", "Period 5: G"]
+  # gen blocks
+    #db["1001"] = ["A Block", "B Block", "C Block", "D Block", "E Block", "F Block", "G Block"]
   # Status for if the system was checked or not
     # db["sysCheck"] = "None"
   # Manual check to see if the bot is refreshing, the time value is set here
     # db["timeCheck"] = None
   # Sets True/False value for if there's pride block
-    # db["pride"] = True
+    #db["pride"] = True
   # List of banned users (banned for spamming/misuse etc)
     # db["bans"] = []
   # True/False value for if the next day is a half day
     # db["half"] = False
+  # Rotate schedule
+    # #db["rotate"] = False
+  # Times / Colors
+    #db["halfTimes"] = [
+    #    "07:19 - 07:54", "07:57 - 08:31", "08:35 - 09:09", "09:13 - 09:47",
+    #    "09:51 - 10:25"
+    #]
+    #db["normalTimes"] = [
+    #      "07:19 - 08:19", "08:23 - 09:23", "09:27 - 09:35", "09:39 - 10:39",
+    #      "10:43 - 11:43", "11:47 - 12:52", "12:56 - 01:51"
+    #  ]
+    #db["prideTimes"] = [
+    #      "07:19 - 08:09", "08:13 - 09:03", "09:07 - 09:55", "09:59 - 10:49",
+    #      "10:53 - 11:43", "11:47 - 12:52", "12:56 - 01:51"
+    #  ]
+    # colors = [ 0xdbbe8a, 0xcae394, 0x82adc4, 0xc0a8f0, 0x8c2727, 0xe08743, 0xffc800, 0x6e7a58, 0x8affcc, 0x5a6e65 ]
 
 # ---------------------------------------- #
 # -------------- SETUP OF BOT ------------ #
@@ -79,7 +98,9 @@ intents = discord.Intents.all()
 intents.members = True
 intents.reactions = True
 client = commands.Bot(command_prefix=get_prefix, intents=intents)
+#DiscordComponents(client)
 client.remove_command('help')
+
 
 # ------------ GLOBAL VARS --------- #
 currentDayClasses = []
@@ -191,8 +212,9 @@ def validator(message, uid):
     embeds(message, "", "User classes not stored. Use " + db[str(message.guild.id)] + "help", discord.Colour.red(), None)
     return False
 
+# change logic    
 # ------------ DEFAULT SCHEDULER --------- #
-def schedules(ctx, uid, gen, stalk):
+def schedules(ctx, uid, gen, stalk, returner, *args):
   name = ""
   if(gen == False):
     name = "For user: " + str(client.get_user(uid).name).capitalize() + " \n"
@@ -202,70 +224,52 @@ def schedules(ctx, uid, gen, stalk):
   filler = ""
   list_msg = None
   length = 0
-  halfTimes = [
-        "07:19 - 07:54", "07:57 - 08:31", "08:35 - 09:09", "09:13 - 09:47",
-        "09:51 - 10:25"
-    ]
-  normalTimes = [
-        "07:19 - 08:19", "08:23 - 09:23", "09:27 - 09:35", "09:39 - 10:39",
-        "10:43 - 11:43", "11:47 - 12:52", "12:56 - 01:51"
-    ]
-  prideTimes = [
-        "07:19 - 08:09", "08:13 - 09:03", "09:07 - 09:55", "09:59 - 10:49",
-        "10:53 - 11:43", "11:47 - 12:52", "12:56 - 01:51"
-    ]
+  start = db["startPeriodTmw"]
+  if(len(args) == 2):
+    start = int(args[1])
   currentTimes = []
-  colors = [
-        0xdbbe8a, 0xcae394, 0x82adc4, 0xc0a8f0, 0x8c2727, 0xe08743, 0xffc800, 0x6e7a58, 0x8affcc, 0x5a6e65
-    ]
 
   # Decide timings and loop length
   if(db["half"] == True):
-    currentTimes = halfTimes
+    currentTimes = db["halfTimes"]
     length = 5
   if(db["pride"] == True and db["half"] == False):
-    currentTimes = prideTimes
+    currentTimes = db["prideTimes"]
     filler = "Pride"
     length = 7
   if(db["pride"] == False and db["half"] == False):
-    currentTimes = normalTimes
+    currentTimes = db["normalTimes"]
     filler = "Break"
     length = 7
 
   # Title setting
-  if (school and db["day"] < 5):
-    list_msg = "**__Today's Schedule__** \n"
-  elif (afterSchool and (db["day"] != 4) and (db["day"] < 5) and db["holiday"]==False):
-    list_msg = "**__Tommorrow's Schedule__** \n"
-  elif (afterSchool and (db["day"] >= 4) and db["holiday"]==False):
-    list_msg = "**__Monday's Schedule__** \n"
-  elif (db["holiday"]==True):
-    list_msg = "**__Schedule After Return__** \n"
+  if(len(args) == 0):
+    if (school and db["day"] < 5):
+      list_msg = "**__Today's Schedule__** \n"
+    elif (afterSchool and (db["day"] != 4) and (db["day"] < 5) and db["holiday"]==False):
+      list_msg = "**__Tommorrow's Schedule__** \n"
+    elif (afterSchool and (db["day"] >= 4) and db["holiday"]==False):
+      list_msg = "**__Monday's Schedule__** \n"
+    elif (db["holiday"]==True):
+      list_msg = "**__Schedule After Return__** \n"
+  else:
+    list_msg = args[0]
 
   # K used to count down individual schedule
   k = 5
   for i in range(length):
-    if not gen:
-      if db["half"] == False:
-        if i == 2:
-              msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + filler + "**\n")
-        elif i == 5:
-              msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + "Lunch/PLUS" + "**\n")
-        elif i != 2 and i != 5:
-              msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db[str(uid)][db["startPeriodTmw"]-k] + "**\n")
-              k = k - 1
-      else:
-        msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db[str(uid)][db["startPeriodTmw"]-k] + "**\n")
-        k = k - 1
+    if db["half"] == False:
+      if i == 2:
+            msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + filler + "**\n")
+      elif i == 5:
+            msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + "Lunch/PLUS" + "**\n")
+      elif i != 2 and i != 5:
+            msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db[str(uid)][start-k] + "**\n")
+            k = k - 1
     else:
-      if db["half"] == False:
-        if i == 2:
-          msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + filler + "**\n")
-        else:
-          msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
-      else:
-        msg = msg + ("*" + (currentTimes[i]) + "*" + " - **" + db["currentPeriods"][i] + "**\n")
-  embed = discord.Embed(title=list_msg, description=msg, colour=random.choice(colors))
+      msg = msg + ("**" + (currentTimes[i]) + "*" + " - **" + db[str(uid)][start-k] + "**\n")
+      k = k - 1
+  embed = discord.Embed(title=list_msg, description=msg, colour=random.choice(db["colors"]))
   if(stalk):
     embed.set_thumbnail(url=client.get_user(uid).avatar_url)
     embed.set_footer(text="Use >private to private schedule.")
@@ -274,17 +278,16 @@ def schedules(ctx, uid, gen, stalk):
   elif(not gen):
     embed.set_thumbnail(url=ctx.author.avatar_url)
     embed.set_footer(text=name + current_date + " / " + current_time + " EST")
-  client.loop.create_task(ctx.send(embed=embed))
+  if returner == True:
+    return embed
+  else:
+    client.loop.create_task(ctx.send(embed=embed))
 
   
 # ------------ PERIODIC FUNCTION 1S --------- #
 def checkTime():
-  global currentDay
-  global currentPeriod
-  global currentDayClasses
   global current_date
   global current_time
-  schedule = ["A", "B", "C", "D", "E", "F", "G"]
   threading.Timer(1, checkTime).start()
   now1 = datetime.now()
   current_date = now1.astimezone(est).strftime("%m-%d")
@@ -302,7 +305,7 @@ def checkTime():
   # -------- Auto 7AM HIT --------#
   if (current_time == "06:30:30" and db["day"] < 5 and db["holiday"] == False):
     channel = client.get_channel(932858966638223390)
-    schedules(channel, 765582891949883403, True, False)
+    schedules(channel, 765582891949883403, True, False, False)
     #  schedules(message, message.author.id, True, False)
     
   # -------- 151-00 HD HIT --------#
@@ -319,53 +322,37 @@ def checkTime():
         db["half"] = False
 
   # ---------- 151-10 HIT ----------#
-  if (current_time == '13:50:40' and db["day"] < 5 and db["holiday"]==False): 
+  if ((current_time == '13:50:40' and db["day"] < 5 and db["holiday"]==False) or db["rotate"] == True): 
     currentDayClasses = []
     currentPeriod = db["startPeriodTmw"]
     # next day is a break day
     if ((db["day"] == 4 or db["day"] == 1 or db["day"] == 3) and db["half"] == False):
-      for i in range(7):
+      for i in range(5):
         if currentPeriod == 7:
           currentPeriod = 0
-        if i !=2 and i != 5 and i != 6:
-          currentDayClasses.append("Period " + str(i + 1) + ": " + schedule[currentPeriod])
+        else:
           currentPeriod += 1
-        if i == 5:
-          currentDayClasses.append("Period " + str(i + 1) + ": " + schedule[currentPeriod])
-          currentPeriod += 1
-        if i == 4:
-          currentDayClasses.append("Lunch/Plus")
-        if i == 2 and db["half"] == False:
-         currentDayClasses.append("filler")
-        db["pride"] = False
-        db['startPeriodTmw'] = currentPeriod
+      db["pride"] = False
+      db['startPeriodTmw'] = currentPeriod
     # next day is a pride day
     elif db["half"] == False:
-      for i in range(7):
+      for i in range(5):
         if currentPeriod == 7:
           currentPeriod = 0
-        if i !=2 and i != 5 and i != 6:
-          currentDayClasses.append("Period " + str(i + 1) + ": " + schedule[currentPeriod])
+        else:
           currentPeriod += 1
-        if i == 5:
-          currentDayClasses.append("Period " + str(i + 1) + ": " + schedule[currentPeriod])
-          currentPeriod += 1
-        if i == 4:
-          currentDayClasses.append("Lunch/Plus")
-        if i == 2:
-          currentDayClasses.append("filler")
-        db["pride"] = True
-        db['startPeriodTmw'] = currentPeriod
+      db["pride"] = True
+      db['startPeriodTmw'] = currentPeriod
     # next day is a half day
     else:
       for i in range(5):
         if currentPeriod == 7:
           currentPeriod = 0
-        currentDayClasses.append("Period " + str(i + 1) + ": " + schedule[currentPeriod])
         currentPeriod += 1
         db['startPeriodTmw'] = currentPeriod
     db["status"] = "schedule updated " + str(current_date) + " " + str(current_time)
     db["currentPeriods"] = currentDayClasses
+    db["rotate"] = False
     
   # ---------- 2PM HOLIDAY HIT ----------#
   rows = []
@@ -387,7 +374,6 @@ def checkTime():
     currentDay += 1
     if (currentDay == 7):
       currentDay = 0
-    # store the current day
     db["day"] = currentDay
 
 checkTime()
@@ -401,11 +387,11 @@ checkTime()
 # ------------ SCHEDULE COMMANDS --------- #
 @client.command()
 async def schedule(message):
-  schedules(message, message.author.id, True, False)
+  schedules(message, 1001, True, False, False)
 @client.command()
 async def mySchedule(message):
   if(validator(message, message.author.id)):
-    schedules(message, message.author.id, False, False)
+    schedules(message, message.author.id, False, False, False)
 
 # ------------ PRIVATE INDIVIDUAL --------- #
 @client.command()
@@ -432,15 +418,15 @@ async def stalk(ctx, user: discord.User):
       embeds(ctx, "", "Unavailable: Users schedule is private.", discord.Colour.red(), 5)
     else:
       if(str(user.id) in db.keys()):
-        schedules(ctx, user.id, False, True)
+        schedules(ctx, user.id, False, True, False)
       else:
         embeds(ctx, "", "Unavailable: User was banned.", discord.Colour.red(), 5)
   except:
     if(str(user.id) in db.keys()):
-      schedules(ctx, user.id, False, True)
+      schedules(ctx, user.id, False, True, False)
     else:
       embeds(ctx, "", "Unavailable: Users schedule is private.", discord.Colour.red(), 5)
-      
+
 # ------------ HOLIDAY FIND  --------- #
 @client.command()
 async def daysoff(ctx):
@@ -560,6 +546,12 @@ async def day(message):
     print("here")
     embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 @client.command()
+async def rotate(message):
+  if(message.author.id == 743999268167352651):
+    db["rotate"] = True
+    embeds(message, "", "Rotated: `" + str(db["rotate"]) + "`", discord.Colour.green(), None)
+  else:
+    embeds(message, "", "Owner only command", discord.Colour.red(), 5)
 async def half(message):
   if(message.author.id == 743999268167352651):
     day = db["half"]
@@ -660,7 +652,7 @@ async def help(message):
       embed.add_field(name="Open Source Code", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
     else:
       embed.add_field(name="**Link to code**", value="[Here](https://github.com/Tarun1877220/Discord-Schedule-Bot)")
-      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "broadcast [message] \n> " + cmd + "rename [new bot name] \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "daysoff - view the upcoming days off from school \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
+      embed.add_field(name="**Commands:**", value="Commands for maintance(owner only): \n\n> " + cmd + "day \n> " + cmd + "SDAT \n> " + cmd + "holidayTrue \n> " + cmd + "rotate \n> " + cmd + "holidayFalse \n> " + cmd + "status \n> " + cmd + "prideStatus \n> " + cmd + "prideChange \n> " + cmd + "sysCheck \n> " + cmd + "sysCheckTimeIn [input time] \n> " + cmd + "sysCheckTime \n> " + cmd + "broadcast [message] \n> " + cmd + "rename [new bot name] \n> " + cmd + "keys \n> >CMDnullOverride \n> \n \n Commands for schedules: \n\n> " + cmd + "schedule - displays the general schedule \n> " + cmd + "mySchedule - display your classes specifically \n> " + cmd + "daysoff - view the upcoming days off from school \n> " + cmd + "addClass [class name] - add your own classes individually from periods A to G \n> " + cmd + "addClasses [list of class names] - add classes with spaces from periods A to G, any classes with multiple words in them should use quotation marks \n> " + cmd + "swapClasses [class stored] [new class] - swaps out an existing stored class for a new one \n> " + cmd + "reset - reset your class list \n", inline = False)
     await message.channel.send(embed = embed)
 
 # ------------ COMMAND ERROR --------- #
