@@ -48,7 +48,7 @@ import csv
 # ---------------- DATABASE -------------- #
 # ---------------------------------------- #
   # Setting num of first period after current blocks (0-6) 
-    #db["startPeriodTmw"] = 1
+db["startPeriodTmw"] = 2
   # Sets the day (0-6)
     #db["day"] = 2
   # Last time the bot was updated for schedule
@@ -305,7 +305,7 @@ def checkTime():
   # -------- Auto 7AM HIT --------#
   if (current_time == "06:30:30" and db["day"] < 5 and db["holiday"] == False):
     channel = client.get_channel(932858966638223390)
-    schedules(channel, 765582891949883403, True, False, False)
+    schedules(channel, 1001, True, False, False)
     #  schedules(message, message.author.id, True, False)
     
   # -------- 151-00 HD HIT --------#
